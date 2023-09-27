@@ -1,6 +1,6 @@
-const authService = require("../login/services/authService");
-const authenticate = require("../login/middleware/authenticationMiddleware");
-const User = require("../login/models/User");
+const authService = require("../services/authService");
+const authenticate = require("../middleware/authenticationMiddleware");
+const User = require("../models/User");
 
 const JWT_SECRET = "secretKey1234";
 

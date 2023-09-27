@@ -1,5 +1,5 @@
-const userService = require("../login/services/userService");
-const authenticate = require("../login/middleware/authenticationMiddleware");
+const userService = require("../services/userService");
+const authenticate = require("../middleware/authenticationMiddleware");
 
 // Function to get user profile
 async function getUserProfile(req, res) {
