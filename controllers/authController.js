@@ -1,8 +1,11 @@
-const authService = require("../services/authService");
-const authenticate = require("../middleware/authenticationMiddleware");
+const authService = require("../login/services/authService");
+const authenticate = require("../login/middleware/authenticationMiddleware");
+const User = require("../login/models/User");
 
-// Function for user registration
+const JWT_SECRET = "secretKey1234";
+
 async function register(req, res) {
+  console.log("login service called");
   try {
     const { email, password, name } = req.body;
     const user = await authService.registerUser(email, password, name);
@@ -12,7 +15,6 @@ async function register(req, res) {
   }
 }
 
-// Function for user login
 async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -25,26 +27,53 @@ async function login(req, res) {
 
 async function logout(req, res) {
   try {
-    // Get the session token from the request headers
     const token = req.headers.authorization;
-
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
-    // Decode the token to extract the user ID
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Delete the session record associated with the token
     await Session.deleteOne({ userId: decoded.userId, token });
-
-    // You can add additional logout logic here if needed
 
     res.json({ message: "Logged out successfully" });
   } catch (error) {
-    // Handle errors (e.g., token verification failure)
     res.status(401).json({ message: "Logout failed: " + error.message });
   }
 }
 
-module.exports = { register, login, logout };
+// Function to generate an access token
+function generateAccessToken(userId) {
+  return jwt.sign({ userId }, JWT_SECRET, {
+    expiresIn: "1h", // Access token expiration time (adjust as needed)
+  });
+}
+
+// Function to refresh an access token using a valid refresh token
+async function refreshAccessToken(req, res) {
+  try {
+    const { refreshToken } = req.body;
+
+    // Verify the refresh token
+
+    console.log("refresh token called");
+    const decoded = jwt.verify(refreshToken, JWT_SECRET);
+
+    console.log(decoded);
+    // Check if the user exists (you can add more validation here)
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    // Generate a new access token
+    const accessToken = generateAccessToken(user._id);
+
+    console.log(accessToken);
+
+    res.json({ accessToken });
+  } catch (error) {
+    res.status(401).json({ message: "Token refresh failed" });
+  }
+}
+
+module.exports = { register, login, logout, refreshAccessToken };

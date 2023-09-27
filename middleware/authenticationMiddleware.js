@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
 const Session = require("../models/Session");
 
-const JWT_SECRET = "your-secret-key"; // Replace with your secret key
+const JWT_SECRET = "your-secret-key";
 
 async function authenticate(req, res, next) {
+  console.log("middleware called");
   const token = req.headers.authorization;
 
   if (!token) {
